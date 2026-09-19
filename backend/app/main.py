@@ -1,5 +1,9 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.database import Base, engine
 from app.routers import auth, companies, financial_records, name_search, scenario
@@ -31,3 +35,19 @@ app.include_router(scenario.router)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+# Serves the built frontend (frontend/dist) from this same process, so the
+# whole app runs as ONE server on ONE port — the shape single-process hosts
+# like Replit want. If dist/ doesn't exist (e.g. local dev with `npm run
+# dev` running separately), this is skipped and only the API is served.
+_frontend_dist = os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist")
+if os.path.isdir(_frontend_dist):
+    app.mount("/assets", StaticFiles(directory=os.path.join(_frontend_dist, "assets")), name="assets")
+
+    @app.get("/{full_path:path}")
+    def serve_frontend(full_path: str):
+        candidate = os.path.join(_frontend_dist, full_path)
+        if full_path and os.path.isfile(candidate):
+            return FileResponse(candidate)
+        return FileResponse(os.path.join(_frontend_dist, "index.html"))
