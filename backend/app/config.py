@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     database_url: str = "sqlite:///./creditlens.db"
     access_token_expire_minutes: int = 60 * 24 * 7  # 7 days, generous for a demo
+    claude_model: str = "claude-sonnet-5"
 
     class Config:
         env_file = ".env"
