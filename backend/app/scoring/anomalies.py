@@ -13,6 +13,20 @@ def detect_anomalies(
     prior = record.get("prior_year")
 
     net_income = float(inc.get("net_income") or 0)
+    equity = float(bs.get("equity") or 0)
+
+    if equity <= 0:
+        flags.append(
+            {
+                "flag": "negative_equity",
+                "detail": (
+                    f"Equity is ₹{equity:,.0f} — accumulated losses have wiped out net worth, "
+                    f"so total liabilities exceed total assets. Debt-to-equity and ROCE can't be "
+                    f"meaningfully calculated while this is the case; this alone is a serious "
+                    f"credit concern regardless of other ratios."
+                ),
+            }
+        )
 
     if cash_flow is not None and net_income > 0 and cash_flow["operating_cash_flow"] < 0:
         flags.append(

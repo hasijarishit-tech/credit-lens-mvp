@@ -54,7 +54,12 @@ def compute_ratios(
     ratios["quick_ratio"] = _safe_div(cash + receivables, current_liabilities)
 
     # Leverage
-    ratios["debt_to_equity"] = _safe_div(long_term_debt, equity)
+    # Debt-to-equity is undefined (not merely "low") when equity is zero or
+    # negative — dividing by a negative equity figure would otherwise flip
+    # the sign and make a technically-insolvent company look great. We mark
+    # it unavailable here; detect_anomalies() raises a dedicated flag for
+    # negative equity so the risk still surfaces clearly.
+    ratios["debt_to_equity"] = _safe_div(long_term_debt, equity) if equity > 0 else None
     ratios["interest_coverage"] = _safe_div(ebit, interest_expense)
 
     if cash_flow is not None:
@@ -67,7 +72,12 @@ def compute_ratios(
     # Profitability
     ratios["gross_margin"] = _safe_div(gross_profit, revenue)
     ratios["net_margin"] = _safe_div(net_income, revenue)
-    ratios["roce"] = _safe_div(ebit, capital_employed)
+    # Gated on equity (not just capital_employed) being positive: when equity
+    # is negative but long-term debt happens to be slightly larger in
+    # magnitude, capital_employed can land just above zero and produce a
+    # wildly inflated ROCE for a company that is, if anything, in worse
+    # shape than a normal low-capital-employed business.
+    ratios["roce"] = _safe_div(ebit, capital_employed) if equity > 0 else None
 
     # Efficiency & growth
     ratios["receivable_days"] = _safe_div(receivables * DAYS_IN_YEAR, revenue)
