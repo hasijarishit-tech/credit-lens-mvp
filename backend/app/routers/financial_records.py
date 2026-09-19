@@ -231,6 +231,18 @@ def get_financial_record(
     return get_owned_financial_record(record_id, db, current_user)
 
 
+@router.get("/financial-records/{record_id}/score", response_model=Optional[ScoreOut])
+def get_score(
+    record_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Returns the already-computed score, or null if this record hasn't
+    been scored yet (POST /score to compute it)."""
+    record = get_owned_financial_record(record_id, db, current_user)
+    return record.score
+
+
 @router.post("/financial-records/{record_id}/score", response_model=ScoreWithIssues)
 def score_financial_record(
     record_id: str,
