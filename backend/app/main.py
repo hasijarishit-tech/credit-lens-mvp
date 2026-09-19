@@ -12,8 +12,11 @@ app = FastAPI(title="CreditLens API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
-    allow_credentials=True,
+    # No cookies are used (auth is a Bearer token), so allowing any origin
+    # doesn't expose session data cross-site — fine for a hackathon deploy
+    # where the frontend's exact deployed URL isn't known ahead of time.
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

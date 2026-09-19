@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: creditlens-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python scripts/seed_demo_companies.py; uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        value: ""
+      - key: CLAUDE_MODEL
+        value: claude-sonnet-5
+      - key: DATABASE_URL
+        value: sqlite:///./creditlens.db
