@@ -12,10 +12,14 @@ from app.scoring.sanity import has_critical_issues, run_sanity_checks
 from app.scoring.score import compute_composite_score
 
 
-def run_pipeline(record: Dict[str, Any], sector: str) -> Dict[str, Any]:
-    issues = run_sanity_checks(record)
+def run_pipeline(record: Dict[str, Any], sector: str, skip_sanity: bool = False) -> Dict[str, Any]:
+    """`skip_sanity=True` is for hypothetical/scenario recomputation (e.g. the
+    lender's "what if" Q&A), where the record is a deliberately-edited
+    what-if rather than a real filing — the balance-tie-out gate exists to
+    catch bad extractions, not to block hypothetical math."""
+    issues = [] if skip_sanity else run_sanity_checks(record)
 
-    if has_critical_issues(issues):
+    if not skip_sanity and has_critical_issues(issues):
         return {
             "status": "needs_review",
             "issues": issues,

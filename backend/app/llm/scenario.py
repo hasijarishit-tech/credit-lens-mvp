@@ -158,8 +158,11 @@ def answer_scenario_question(
 
     adjusted_record = _apply_adjustments(record, interpretation["adjustments"])
 
-    before = run_pipeline_fn(record, sector)
-    after = run_pipeline_fn(adjusted_record, sector)
+    # skip_sanity=True: a single-field what-if naturally won't keep the
+    # balance sheet tied out (e.g. doubling receivables with nothing else
+    # adjusted) — that's expected for a hypothetical, not a data error.
+    before = run_pipeline_fn(record, sector, skip_sanity=True)
+    after = run_pipeline_fn(adjusted_record, sector, skip_sanity=True)
 
     comparison_payload = {
         "question": question,

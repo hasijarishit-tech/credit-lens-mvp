@@ -128,7 +128,8 @@ class Score(Base):
     anomaly_flags = Column(JSON, nullable=False)  # list of {flag, detail}
     derived_cash_flow = Column(JSON, nullable=True)
 
-    narrative_text = Column(Text, nullable=True)
+    narrative_text = Column(Text, nullable=True)  # MSME-facing plain-English coaching
+    lender_summary_text = Column(Text, nullable=True)  # lender-facing analyst note
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
