@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
-from app.routers import auth
+from app.routers import auth, companies, financial_records, name_search, scenario
 
 # Creates tables on startup if they don't exist yet. Fine for a hackathon MVP;
 # a real product would use migrations (e.g. Alembic) instead.
@@ -19,6 +19,10 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(companies.router)
+app.include_router(financial_records.router)
+app.include_router(name_search.router)
+app.include_router(scenario.router)
 
 
 @app.get("/health")

@@ -7,6 +7,7 @@ from typing import Any, Dict
 
 from app.config import settings
 from app.extraction.rule_based import extract_financials_rule_based
+from app.extraction.screener_parser import extract_financials_screener, is_screener_url
 
 
 def is_llm_configured() -> bool:
@@ -21,6 +22,15 @@ def extract_financials(
 
         result = extract_with_claude(text, source_type, source_reference, sector_hint)
         result["extraction_notes"]["method"] = "claude"
+        return result
+
+    # Screener.in reports aggregated line items the generic keyword matcher
+    # can't find at all (it never uses words like "sundry debtors") — try
+    # the site-specific parser first for those pages.
+    if source_type in ("source_link", "name_search") and is_screener_url(source_reference):
+        result = extract_financials_screener(text, source_reference)
+        result["source_type"] = source_type
+        result["source_reference"] = source_reference
         return result
 
     return extract_financials_rule_based(text, source_type, source_reference)
